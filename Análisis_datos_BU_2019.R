@@ -12,6 +12,8 @@ table(is.na(Datos_BU_2019$ASIGNACION))
 table(is.na(Datos_BU_2019$CUI))
 table(Datos_BU_2019$CUI)
 #Hace falta transformar las fechas a formato fecha y el cui a string para comparar largo
+
+#------------------------------------LIMPIAR DATOS-----------------------------------------#
 #CUI
 Datos_BU_2019$CUI<- as.character(Datos_BU_2019$CUI)
 table(nchar(Datos_BU_2019$CUI))
@@ -25,5 +27,27 @@ table(Datos_BU_2019$FECHA_NACIMIENTO)
 Datos_BU_2019$FECHA_NACIMIENTO_CORREGIDA <- format(as.POSIXct(Datos_BU_2019$FECHA_NACIMIENTO,
                                                               format='%m/%d/%Y %H:%M:%S'),format='%m/%d/%Y')
 Datos_BU_2019$FECHA_NACIMIENTO_CORREGIDA <- as.Date(Datos_BU_2019$FECHA_NACIMIENTO_CORREGIDA, format="%m/%d/%Y")
+#EDAD
+Datos_BU_2019$EDAD <- as.integer(Datos_BU_2019$EDAD)
+summary(Datos_BU_2019$EDAD)
+#DESCRIPCION
+table(Datos_BU_2019$DESCRIPCION, useNA = "ifany")
+prop.table(table(Datos_BU_2019$DESCRIPCION, useNA = "ifany"))
+#CURSO
+table(Datos_BU_2019$CURSO, useNA = "ifany")
+#Crear grupo de edad
+Datos_BU_2019$GRUPO_EDAD <- NA
+Datos_BU_2019$GRUPO_EDAD[Datos_BU_2019$EDAD<15] <- "MENOR"
+Datos_BU_2019$GRUPO_EDAD[Datos_BU_2019$EDAD>14 &
+                                 Datos_BU_2019$EDAD<30] <- "JOVEN"
+Datos_BU_2019$GRUPO_EDAD[Datos_BU_2019$EDAD>29 &
+                                 Datos_BU_2019$EDAD<60] <- "ADULTO"
+Datos_BU_2019$GRUPO_EDAD[Datos_BU_2019$EDAD>59] <- "ADULTO MAYOR"
+table(Datos_BU_2019$GRUPO_EDAD,useNA = "ifany")
+prop.table(table(Datos_BU_2019$GRUPO_EDAD,useNA = "ifany"))
+#Crear categorias de cursos
+x<- levels(Datos_BU_2019$CURSO)
 
-
+write.csv(x,
+          file = "Tabla de cursos")
+rm(x)
