@@ -1,4 +1,5 @@
 library(tidyverse)
+
 #Cargar datos
 Datos_BU_2019 <- 
         read.csv("~/R Projects/Reporte_Gerencia_BU_2019/Datos/Datos_BU_2019.csv")
@@ -51,3 +52,37 @@ x<- levels(Datos_BU_2019$CURSO)
 write.csv(x,
           file = "Tabla de cursos")
 rm(x)
+
+#Agregar la base de datos de EMEFUT
+Datos_EMEEFUT_17_20 <- 
+        read.csv("~/R Projects/Reporte_Gerencia_BU_2019/Datos/Datos_EMEEFUT_17_20.csv")
+table(Datos_EMEEFUT_17_20$ANIO)
+Datos_EMEEFUT_17_20$CUI <- as.character(Datos_EMEEFUT_17_20$CUI)
+table(nchar(Datos_EMEEFUT_17_20$CUI))
+
+#Agregar los tipos de cursos
+Tabla_Tipo_Cursos <- 
+        read.csv("~/R Projects/Reporte_Gerencia_BU_2019/Datos/Tabla_Tipo_Cursos.csv")
+str(Tabla_Tipo_Cursos)
+class(Tabla_Tipo_Cursos$TIPO_CURSO)
+Datos_BU_2019$TIPO_CURSO <- NA
+Datos_BU_2019$TIPO_CURSO <- 
+        Tabla_Tipo_Cursos$TIPO_CURSO[match(Datos_BU_2019$CURSO,Tabla_Tipo_Cursos$CURSO)]
+table(Datos_BU_2019$TIPO_CURSO, useNA = "ifany")
+table(Tabla_Tipo_Cursos$TIPO_CURSO)
+table(nchar(Datos_BU_2019$CUI))
+rm(Tabla_Tipo_Cursos)
+
+#Limpiar datos de EMEFUT
+class(Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA)
+Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA <- NA
+Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA<- format(as.POSIXct(Datos_EMEEFUT_17_20$FECHA_NACIMIENTO,
+                                                          format='%m/%d/%Y %H:%M:%S'),format='%m/%d/%Y')
+Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA <- as.Date(Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA, format="%m/%d/%Y")
+
+
+
+
+
+
+
