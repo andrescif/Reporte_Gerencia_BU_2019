@@ -1,5 +1,5 @@
 library(tidyverse)
-
+library(eeptools)
 #Cargar datos
 Datos_BU_2019 <- 
         read.csv("~/R Projects/Reporte_Gerencia_BU_2019/Datos/Datos_BU_2019.csv")
@@ -79,10 +79,5 @@ Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA <- NA
 Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA<- format(as.POSIXct(Datos_EMEEFUT_17_20$FECHA_NACIMIENTO,
                                                           format='%m/%d/%Y %H:%M:%S'),format='%m/%d/%Y')
 Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA <- as.Date(Datos_EMEEFUT_17_20$FECHA_NACIMIENTO_CORREGIDA, format="%m/%d/%Y")
-
-
-
-
-
 
 
