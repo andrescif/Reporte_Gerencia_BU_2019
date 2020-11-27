@@ -27,6 +27,12 @@ PUESTO_FUNCIONAL<- subset.data.frame(ALFA_PUESTO_FUNCIONAL,
 write.csv(PUESTO_FUNCIONAL,
           file = "Puestos funcionales unicos")
 
+CUADRO_INFORMATICA <- PERSONAL_PS_DDS %>%
+        select(c(Renglón.Presupuestario, Nombre..Completo, Puesto.Funcional))
+write.csv(CUADRO_INFORMATICA,
+          file = "Cuadro renglon nombre puesto")
+
+rm(CUADRO_INFORMATICA)
 rm(PUESTO_FUNCIONAL)
 rm(ALFA_PUESTO_FUNCIONAL)
 rm(PERSONAL_PS_DDS)
