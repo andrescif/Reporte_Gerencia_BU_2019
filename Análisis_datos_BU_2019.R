@@ -31,7 +31,7 @@ age_years <- function(earlier, later)
   
   age
 }
-#------------------------------------LIMPIAR DATOS-----------------------------------------#
+#------------------------------------LIMPIAR DATOS-----------------------------------------
 #CUI
 Datos_BU_2019$CUI<- as.character(Datos_BU_2019$CUI)
 table(nchar(Datos_BU_2019$CUI))
@@ -151,7 +151,7 @@ Datos_EMEEFUT_17_20$DESCRIPCION <- "DESARROLLO SOCIAL"
 #Agregar "Municipio" a base EMEFUT
 Datos_EMEEFUT_17_20$MUNICIPIO <- NA
 
-#---------------------CREAR NUEVA BASE DE DATOS-------------------------------------------#
+#---------------------CREAR NUEVA BASE DE DATOS-------------------------------------------
 BU_FINAL <- Datos_BU_2019 %>%
   select(DESCRIPCION,CUI,SEXO,ZONA,MUNICIPIO,FECHA_NACIMIENTO_CORREGIDA,GRUPO_EDAD,
         TIPO_CURSO,EDAD,ANIO)
@@ -163,6 +163,29 @@ names(EMEFUT_limpia) <- c("DESCRIPCION","CUI","SEXO","ZONA","MUNICIPIO",
                           "ANIO")
 BU_FINAL<- rbind(BU_FINAL,
       EMEFUT_limpia)
+
+#----------------------ANALISIS DE DATOS 2019 BU------------------------------------------
+table(BU_FINAL$ANIO)
+BU_2019 <- subset.data.frame(BU_FINAL,
+                  BU_FINAL$ANIO==2019)
+#La base de datos a utilizar es BU_2019
+table(BU_2019$DESCRIPCION)
+table(BU_2019$TIPO_CURSO)
+prop.table(table(BU_2019$TIPO_CURSO))
+
+#Beneficiarios por dirección y por tipo de beneficio
+ggplot(BU_2019,
+       aes(DESCRIPCION,fill=TIPO_CURSO))+
+  geom_bar()+
+  theme_bw()
+
+x<- BU_2019 %>%
+  group_by(DESCRIPCION,TIPO_CURSO) %>%
+  summarise(Total_Beneficiarios=n(),
+            Prop_Beneficiarios=Total_Beneficiarios/32619)
+write.csv(x,
+          file = "Beneficiarios 2019 por direccion y tipo curso")
+
 
 
 
