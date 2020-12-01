@@ -163,7 +163,11 @@ names(EMEFUT_limpia) <- c("DESCRIPCION","CUI","SEXO","ZONA","MUNICIPIO",
                           "ANIO")
 BU_FINAL<- rbind(BU_FINAL,
       EMEFUT_limpia)
-
+class(BU_2019$GRUPO_EDAD)
+levels(BU_2019$GRUPO_EDAD)
+BU_2019$GRUPO_EDAD <- as.factor(BU_2019$GRUPO_EDAD)
+BU_2019$GRUPO_EDAD <- ordered(BU_2019$GRUPO_EDAD,
+                              levels=c("MENOR","JOVEN","ADULTO","ADULTO MAYOR"))
 #----------------------ANALISIS DE DATOS 2019 BU------------------------------------------
 table(BU_FINAL$ANIO)
 BU_2019 <- subset.data.frame(BU_FINAL,
@@ -172,7 +176,21 @@ BU_2019 <- subset.data.frame(BU_FINAL,
 table(BU_2019$DESCRIPCION)
 table(BU_2019$TIPO_CURSO)
 prop.table(table(BU_2019$TIPO_CURSO))
-
+#Limpiar NA de todos los valores relevantes
+#CUI
+table(nchar(BU_2019$CUI), useNA = "ifany")
+BU_2019$CHAR_CUI <- nchar(BU_2019$CUI)
+BU_2019<- subset.data.frame(BU_2019,
+                  BU_2019$CHAR_CUI==13)
+#Sexo
+table(BU_2019$SEXO, useNA = "ifany")
+#Edad
+table(BU_2019$EDAD,useNA = "ifany")
+BU_2019$FECHA_NACIMIENTO_CORREGIDA[is.na(BU_2019$EDAD)]
+BU_2019$DESCRIPCION[is.na(BU_2019$EDAD)]
+BU_2019$TIPO_CURSO[is.na(BU_2019$EDAD)]
+BU_2019 <- subset.data.frame(BU_2019,
+                  !is.na(BU_2019$EDAD))
 #Beneficiarios por dirección y por tipo de beneficio
 ggplot(BU_2019,
        aes(DESCRIPCION,fill=TIPO_CURSO))+
@@ -182,12 +200,56 @@ ggplot(BU_2019,
 x<- BU_2019 %>%
   group_by(DESCRIPCION,TIPO_CURSO) %>%
   summarise(Total_Beneficiarios=n(),
-            Prop_Beneficiarios=Total_Beneficiarios/32619)
+            Prop_Beneficiarios=Total_Beneficiarios/32609)
 write.csv(x,
           file = "Beneficiarios 2019 por direccion y tipo curso")
+rm(x)
 
+#Beneficiarios por dirección y por sexo
+ggplot(BU_2019,
+       aes(DESCRIPCION,fill=SEXO))+
+  geom_bar()+
+  theme_bw()+
+  labs(x="Dirección",
+       y="Beneficiarios",
+       title = "Beneficiarios por Dirección y Género")
 
+x<- BU_2019 %>%
+  group_by(DESCRIPCION,SEXO) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/32609)
+write.csv(x,
+          file = "Beneficiarios 2019 por direccion y sexo")
+rm(x)
 
+#Beneficiarios por dirección y grupo de edad
+table(is.na(BU_2019$GRUPO_EDAD))
 
+x <- BU_2019 %>%
+  group_by(DESCRIPCION,GRUPO_EDAD) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/32609)
+write.csv(x,
+          file = "Beneficiarios 2019 por dirección y grupo de edad")
+rm(x)
+
+ggplot(BU_2019,
+       aes(DESCRIPCION,
+           fill=GRUPO_EDAD))+
+  theme_bw()+
+  geom_bar()+
+  labs(x="Dirección",
+       y="Beneficiarios",
+       title = "Beneficiarios por Dirección y Grupo de Edad")+
+  guides(fill=guide_legend(title="Grupo de edad"))
+#Zona
+table(BU_2019$ZONA, useNA = "ifany")
+#Corregir zona
+BU_2019$ZONA[BU_2019$ZONA==0] <- NA
+BU_2019$ZONA[BU_2019$ZONA==22] <- NA
+BU_2019$ZONA[BU_2019$ZONA==23] <- NA
+BU_2019$ZONA[BU_2019$ZONA==53] <- NA
+BU_2019$ZONA[BU_2019$ZONA==73] <- NA
+prop.table(table(BU_2019$ZONA, useNA = "ifany"))
 
 
