@@ -53,6 +53,9 @@ table(Datos_BU_2019$DESCRIPCION, useNA = "ifany")
 prop.table(table(Datos_BU_2019$DESCRIPCION, useNA = "ifany"))
 #CURSO
 table(Datos_BU_2019$CURSO, useNA = "ifany")
+#Cambiar los factores
+levels(Datos_BU_2019$SEXO)[levels(Datos_BU_2019$SEXO)=="F"] <- "Femenino"
+levels(Datos_BU_2019$SEXO)[levels(Datos_BU_2019$SEXO)=="M"] <- "Masculino"
 #Crear edad corregida
 Datos_BU_2019$EDAD_CORREGIDA <- NA
 Datos_BU_2019$EDAD_CORREGIDA<- 
@@ -251,5 +254,141 @@ BU_2019$ZONA[BU_2019$ZONA==23] <- NA
 BU_2019$ZONA[BU_2019$ZONA==53] <- NA
 BU_2019$ZONA[BU_2019$ZONA==73] <- NA
 prop.table(table(BU_2019$ZONA, useNA = "ifany"))
+#Incluir regiones en la base de datos
+BU_2019$REGION <- NA
+#Region 1
+BU_2019$REGION[BU_2019$ZONA==1] <- 1
+BU_2019$REGION[BU_2019$ZONA==4] <- 1
+BU_2019$REGION[BU_2019$ZONA==5] <- 1
+BU_2019$REGION[BU_2019$ZONA==8] <- 1
+BU_2019$REGION[BU_2019$ZONA==9] <- 1
+BU_2019$REGION[BU_2019$ZONA==11] <- 1
+#Region 2
+BU_2019$REGION[BU_2019$ZONA==2] <- 2
+BU_2019$REGION[BU_2019$ZONA==3] <- 2
+BU_2019$REGION[BU_2019$ZONA==6] <- 2
+BU_2019$REGION[BU_2019$ZONA==7] <- 2
+BU_2019$REGION[BU_2019$ZONA==10] <- 2
+BU_2019$REGION[BU_2019$ZONA==19] <- 2
+#Region 3
+BU_2019$REGION[BU_2019$ZONA==12] <- 3
+BU_2019$REGION[BU_2019$ZONA==13] <- 3
+BU_2019$REGION[BU_2019$ZONA==14] <- 3
+BU_2019$REGION[BU_2019$ZONA==15] <- 3
+BU_2019$REGION[BU_2019$ZONA==16] <- 3
+BU_2019$REGION[BU_2019$ZONA==21] <- 3
+#Region 4
+BU_2019$REGION[BU_2019$ZONA==17] <- 4
+BU_2019$REGION[BU_2019$ZONA==18] <- 4
+BU_2019$REGION[BU_2019$ZONA==24] <- 4
+BU_2019$REGION[BU_2019$ZONA==25] <- 4
+#Revision
+table(BU_2019$REGION, useNA = "ifany")
+BU_2019$ZONA[is.na(BU_2019$REGION)]
+table(BU_2019$ZONA, useNA = "ifany")
+#Por region y grupo de edad
+ggplot(BU_2019,
+       aes(REGION,fill=GRUPO_EDAD))+
+  theme_bw()+
+  geom_bar()+
+  labs(y="Beneficiarios",
+       x="Región",
+       title = "Beneficiarios 2019 por Región y Grupo de Edad")+
+  guides(fill=guide_legend(title="Grupo de edad"))
+32609-234
+x<- subset.data.frame(BU_2019,
+                  !is.na(BU_2019$REGION))
+
+x <- x %>%
+  group_by(REGION,GRUPO_EDAD) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/32375)
+write.csv(x,
+          file = "Beneficiarios 2019 por región y grupo de edad")
+
+#Beneficiarios por región y por sexo
+ggplot(BU_2019,
+       aes(REGION,fill=SEXO))+
+  theme_bw()+
+  geom_bar()+
+  labs(x="Región",
+       y="Beneficiarios",
+       title = "Beneficiarios 2019 por Región y Sexo")+
+  guides(fill=guide_legend(title="Sexo"))
+
+x<- subset.data.frame(BU_2019,
+                      !is.na(BU_2019$REGION))
+x<- x %>%
+  group_by(REGION,SEXO) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/32375)
+write.csv(x,
+          file = "Beneficiarios 2019 por región y sexo")
+rm(x)
+#Edad de las mujeres atendidas
+table(BU_2019$SEXO,useNA = "ifany")
+ggplot(Datos_BU_2019,
+       aes(EDAD))+
+  theme_bw()+
+  geom_freqpoly()+
+  facet_wrap(~SEXO)
+#----------------CORREGIR LA EDAD UTILIZANDO FECHA DE NACIMIENTO--------------------------
+class(BU_2019$FECHA_NACIMIENTO_CORREGIDA)
+BU_2019$ANIO_NAC <- 
+  format(as.Date(BU_2019$FECHA_NACIMIENTO_CORREGIDA, format="%Y-%m/%d"),"%Y")
+BU_2019$ANIO_NAC <- as.numeric(BU_2019$ANIO_NAC)
+BU_2019$ANIO_ANALISIS <- 2019
+class(BU_2019$ANIO_NAC)
+class(BU_2019$ANIO_ANALISIS)
+BU_2019$EDAD_NUEVA <- (BU_2019$ANIO_ANALISIS - BU_2019$ANIO_NAC)
+table(BU_2019$EDAD_NUEVA)
+summary(BU_2019$EDAD_NUEVA)
+table(BU_2019$FECHA_NACIMIENTO_CORREGIDA[BU_2019$EDAD_NUEVA<1])
+table(BU_2019$TIPO_CURSO[BU_2019$EDAD_NUEVA<1])
+table(BU_2019$EDAD[BU_2019$EDAD_NUEVA<1])
+table(BU_2019$EDAD_NUEVA, useNA = "ifany")
+table(is.na(BU_2019$FECHA_NACIMIENTO_CORREGIDA))
+summary(BU_2019$EDAD_NUEVA - BU_2019$EDAD)
+boxplot(BU_2019$EDAD_NUEVA - BU_2019$EDAD)
+summary(BU_2019$EDAD_NUEVA)
+table(BU_2019$EDAD_NUEVA,useNA = "ifany")
+class(BU_2019$EDAD_NUEVA)
+#Eliminar los datos menores de 1 año de edad ya que carecen de sentido
+BU_2019$EDAD_NUEVA[BU_2019$EDAD_NUEVA<1] <- NA
+#Crear nueva base de datos para generar grupos de edad
+Edad_FecNac <- BU_2019 %>%
+  filter(!is.na(BU_2019$EDAD_NUEVA))
+table(Edad_FecNac$SEXO)
+class(Edad_FecNac$SEXO)
+Edad_FecNac$SEXO[Edad_FecNac$SEXO=="F"]
+#Cambiar los factores
+levels(Edad_FecNac$SEXO)[levels(Edad_FecNac$SEXO)=="F"] <- "Femenino"
+levels(Edad_FecNac$SEXO)[levels(Edad_FecNac$SEXO)=="M"] <- "Masculino"
+
+ggplot(Edad_FecNac,
+       aes(EDAD_NUEVA, colour=SEXO))+
+  theme_bw()+
+  geom_freqpoly(binwidth = 1)+
+  labs(x="Años de edad",
+       y="Beneficiarios",
+       title = "Beneficiarios de Servicios Sociales 2019 por Edad y Sexo")
+
+ggplot(Edad_FecNac,
+       aes(EDAD_NUEVA, colour=DESCRIPCION))+
+  theme_bw()+
+  geom_freqpoly(binwidth = 1)+
+  facet_wrap(~SEXO)+
+  labs(x="Años de edad",
+       y="Beneficiarios",
+       title = "Beneficiarios por Sexo, Dirección de Atención y Edad")+
+  guides(colour=guide_legend(title="Dirección que atiende"))
+
+
+
+
+
+  
+
+
 
 
