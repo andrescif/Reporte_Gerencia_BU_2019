@@ -225,26 +225,7 @@ write.csv(x,
           file = "Beneficiarios 2019 por direccion y sexo")
 rm(x)
 
-#Beneficiarios por dirección y grupo de edad
-table(is.na(BU_2019$GRUPO_EDAD))
 
-x <- BU_2019 %>%
-  group_by(DESCRIPCION,GRUPO_EDAD) %>%
-  summarise(Total_beneficiarios=n(),
-            Prop_beneficiarios=Total_beneficiarios/32609)
-write.csv(x,
-          file = "Beneficiarios 2019 por dirección y grupo de edad")
-rm(x)
-
-ggplot(BU_2019,
-       aes(DESCRIPCION,
-           fill=GRUPO_EDAD))+
-  theme_bw()+
-  geom_bar()+
-  labs(x="Dirección",
-       y="Beneficiarios",
-       title = "Beneficiarios por Dirección y Grupo de Edad")+
-  guides(fill=guide_legend(title="Grupo de edad"))
 #Zona
 table(BU_2019$ZONA, useNA = "ifany")
 #Corregir zona
@@ -383,12 +364,89 @@ ggplot(Edad_FecNac,
        title = "Beneficiarios por Sexo, Dirección de Atención y Edad")+
   guides(colour=guide_legend(title="Dirección que atiende"))
 
+ggplot(Edad_FecNac,
+       aes(EDAD_NUEVA, colour=SEXO))+
+  theme_bw()+
+  geom_freqpoly(binwidth=1)+
+  facet_wrap(~TIPO_CURSO)+
+  labs(x="Años de edad",
+       y="Beneficiarios",
+       title = "Beneficiarios por Sexo, Edad y Tipo de Beneficio")+
+  guides(colour=guide_legend(title="Sexo"))
 
+#Construir el GRUPO_EDAD para la base de datos
+Edad_FecNac$GRUPO_EDAD[Edad_FecNac$EDAD_NUEVA<15] <- "MENOR"
+Edad_FecNac$GRUPO_EDAD[Edad_FecNac$EDAD_NUEVA>14 &
+                           Edad_FecNac$EDAD_NUEVA<30] <- "JOVEN"
+Edad_FecNac$GRUPO_EDAD[Edad_FecNac$EDAD_NUEVA>29 &
+                           Edad_FecNac$EDAD_NUEVA<60] <- "ADULTO"
+Edad_FecNac$GRUPO_EDAD[Edad_FecNac$EDAD_NUEVA>59] <- "ADULTO MAYOR"
+#Analisis utilizando grupo de edad
+table(Edad_FecNac$GRUPO_EDAD)
+prop.table(table(Edad_FecNac$GRUPO_EDAD))
+#Por sexo y grupo de edad
+ggplot(Edad_FecNac,
+       aes(SEXO,fill=GRUPO_EDAD))+
+  theme_bw()+
+  geom_bar()+
+  labs(x="Sexo",
+       y="Cantidad beneficiarios",
+       title = "Beneficiarios 2019 por Sexo y Grupo de Edad")+
+  guides(fill=guide_legend(title="Grupo de edad"))
 
+x <- Edad_FecNac %>%
+  group_by(SEXO,GRUPO_EDAD) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/26343)
+write.csv(x,
+          file = "Beneficiarios 2019 por sexo y grupo de edad")
+rm(x)  
+#Por programa y grupo de edad
+ggplot(Edad_FecNac,
+       aes(DESCRIPCION,fill=GRUPO_EDAD))+
+  theme_bw()+
+  geom_bar()+
+  labs(x="",
+       y="Cantidad beneficiarios",
+       title = "Beneficiarios 2019 por Dirección y Grupo de Edad")+
+  guides(fill=guide_legend(title = "Grupo de edad"))
 
+x <- Edad_FecNac %>%
+  group_by(DESCRIPCION,GRUPO_EDAD) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/26343)
+rm(x)
 
-  
+#Por tipo de servicio, dirección y grupo de edad
+ggplot(Edad_FecNac,
+       aes(DESCRIPCION,fill=GRUPO_EDAD))+
+  theme_bw()+
+  geom_bar()+
+  labs(x="",
+       y="Cantidad beneficiarios",
+       title = "Beneficiarios 2019 por Dirección, Grupo de Edad y Tipo de Servicio")+
+  guides(fill=guide_legend(title = "Grupo de edad"))+
+  facet_wrap(~TIPO_CURSO)+
+  coord_flip()
 
+#Por región y grupo de edad
+ggplot(Edad_FecNac,
+       aes(REGION,fill=GRUPO_EDAD))+
+  theme_bw()+
+  geom_bar()+
+  guides(fill=guide_legend(title = "Grupo de edad"))+
+  labs(x="Región",
+       y="Beneficiarios",
+       title = "Beneficiarios 2019 por Región de Atención y Grupo de Edad")
+
+x<- Edad_FecNac %>%
+  filter(!is.na(Edad_FecNac$REGION))%>%
+  group_by(REGION,GRUPO_EDAD) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/26114)
+write.csv(x,
+          file = "Beneficiarios 2019 por region de atencion y grupo de edad")
+rm(x)
 
 
 
