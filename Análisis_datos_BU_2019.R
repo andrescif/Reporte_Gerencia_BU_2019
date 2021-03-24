@@ -1,5 +1,6 @@
 library(tidyverse)
 library(eeptools)
+library(lubridate)
 R.Version()
 #Cargar datos
 Datos_BU_2019 <- 
@@ -447,6 +448,69 @@ x<- Edad_FecNac %>%
 write.csv(x,
           file = "Beneficiarios 2019 por region de atencion y grupo de edad")
 rm(x)
+#Por región y sexo
+ggplot(Edad_FecNac,
+       aes(REGION,fill=SEXO))+
+  theme_bw()+
+  geom_bar()+
+  guides(fill=guide_legend(title = "Sexo"))+
+  labs(x="Región",
+       y="Beneficiarios",
+       title = "Beneficiarios 2019 por Región y Sexo")
+
+X<- Edad_FecNac %>%
+  filter(!is.na(REGION)) %>%
+  group_by(REGION,SEXO)%>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/26114)
+write.csv(X,
+          file = "Beneficiarios 2019 por region y sexo")
+rm(X)
+
+#Revisar por año de agregación
+BU_FINAL %>%
+  filter(ANIO>2016) %>%
+ggplot(aes(ANIO,fill=DESCRIPCION))+
+  geom_bar()+
+  guides(fill=guide_legend(title = "Dirección"))+
+  labs(x="Año de registro en Beneficiario Único",
+       y="Cantidad de beneficiarios",
+       title = "Beneficiarios de Beneficiario Único (BU) por Año de Ingreso")
+
+x<- BU_FINAL %>%
+  filter(ANIO>2016) %>%
+  group_by(ANIO,DESCRIPCION) %>%
+  summarise(Total_beneficiarios=n(),
+            Prop_beneficiarios=Total_beneficiarios/45166)
+write.csv(x,
+          file = "Beneficiarios de BU por año de ingreso a la base de datos")
+rm(x)
+
+#Tipos de cursos que aportaron beneficiarios cada año
+BU_FINAL %>%
+  filter(ANIO>2016) %>%
+  ggplot(aes(ANIO,fill=DESCRIPCION))+
+  theme_bw()+
+  geom_bar()+
+  facet_wrap(~TIPO_CURSO)+
+  guides(fill=guide_legend(title = "Dirección"))+
+  labs(x="Año de ingreso al Beneficiario Único",
+       y="Cantidad de beneficiarios",
+       title = "Beneficiarios en el Beneficiario Único por Tipo de Servicios y Dirección")
+
+#Crear año de nacimiento en base de datos general
+BU_FINAL$ANIO_NAC <- NA
+BU_FINAL$ANIO_NAC <-  year(BU_FINAL$FECHA_NACIMIENTO_CORREGIDA)
+class(BU_FINAL$ANIO_NAC)
+BU_FINAL$EDAD_2019 <- (2019 - BU_FINAL$ANIO_NAC)
+summary(BU_FINAL$EDAD_2019)
+
+
+
+
+
+
+
 
 
 
